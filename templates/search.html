@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}社内文書検索 - AI人事研修システム{% endblock %}
+{% block content %}
+<div class="content-header"><div><h1>社内文書検索</h1><p>Dify Knowledgeに登録した社内規則・マニュアルを検索します。</p></div></div>
+<section class="page-card rag-page">
+  <h2>🔍 社内文書検索（RAG）</h2>
+  <p class="lead">知りたい内容を自然な文章で入力してください。関連する社内文書をもとに回答します。</p>
+  <form method="POST" class="rag-search-box" id="rag-search-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="rag-search-row"><input id="rag-question" type="text" name="question" value="" placeholder="例：テレワーク申請のルールを教えてください" required><button id="rag-search-button" class="btn btn-primary" type="submit">検索</button></div>
+    <p class="help-text">例：評価基準を教えてください ／ 有給休暇の申請方法は？ ／ 研修レポートの提出方法は？</p>
+  </form>
+  {% if result %}
+    {% if result.error %}<div class="alert alert-warning">{{ result.error }}</div>{% endif %}
+    <h2 class="result-title">検索結果</h2>
+    <div class="result-list">
+      {% for rec in result.records %}
+        <article class="answer-card"><div class="answer-label">AI回答</div><h3>{{ rec.title }}</h3><p>{{ rec.content }}</p><div class="answer-meta">関連度スコア：{{ rec.score }}</div></article>
+      {% else %}<div class="empty-state">検索結果がありません。質問を変えてもう一度お試しください。</div>{% endfor %}
+    </div>
+  {% endif %}
+</section>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("rag-search-form");
+  const button = document.getElementById("rag-search-button");
+  const input = document.getElementById("rag-question");
+
+  if (!form || !button || !input) return;
+
+  // 初期状態（検索結果表示後もこの状態へ戻る）
+  button.disabled = false;
+  button.textContent = "検索";
+  input.readOnly = false;
+  input.value = "";
+
+  form.addEventListener("submit", () => {
+    button.disabled = true;
+    button.textContent = "検索中...";
+    input.readOnly = true;
+  });
+});
+</script>
+{% endblock %}

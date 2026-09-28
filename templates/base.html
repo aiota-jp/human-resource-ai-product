@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}AI人事研修業務支援システム{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="sidebar-logo" href="{{ url_for('index') }}">🏢 AI人事・研修<br>システム</a>
+      <nav class="sidebar-menu" aria-label="メインメニュー">
+        {% if session.get('employee_id') %}
+        <a href="{{ url_for('employee_portal') }}" class="{% if request.endpoint == 'employee_portal' %}active{% endif %}">🏠 マイページ</a>
+        {% else %}
+        <a href="{{ url_for('index') }}" class="{% if request.endpoint == 'index' %}active{% endif %}">📊 ダッシュボード</a>
+        {% endif %}
+        {% if session.get('role') in ['staff', 'admin'] %}
+        <a href="{{ url_for('employee_list') }}" class="{% if request.endpoint in ['employee_list', 'employee_new', 'employee_edit'] %}active{% endif %}">👤 社員管理</a>
+        <a href="{{ url_for('training_list') }}" class="{% if request.endpoint in ['training_list', 'training_new', 'training_history'] %}active{% endif %}">📚 研修管理</a>
+        <a href="{{ url_for('evaluation_list') }}" class="{% if request.endpoint in ['evaluation_list', 'evaluation_generate'] %}active{% endif %}">⭐ 評価管理</a>
+        <a href="{{ url_for('import_excel') }}" class="{% if request.endpoint == 'import_excel' %}active{% endif %}">📥 Excel取込</a>
+        {% endif %}
+        <a href="{{ url_for('report_list') }}" class="{% if request.endpoint in ['report_list', 'report_new'] %}active{% endif %}">📝 日報管理</a>
+        <a href="{{ url_for('search') }}" class="{% if request.endpoint == 'search' %}active{% endif %}">🔍 文書検索</a>
+        <a href="{{ url_for('chat') }}" class="{% if request.endpoint in ['chat', 'chat_send'] %}active{% endif %}">💬 FAQチャット</a>
+      </nav>
+    </aside>
+    <div class="workspace">
+      <header class="topbar">
+        <button class="menu-toggle" type="button" aria-label="メニューを開閉" onclick="document.body.classList.toggle('sidebar-open')">☰</button>
+        <div class="topbar-spacer"></div>
+        <div class="user-pill"><span>👤 {{ session.get('employee_name') or session.get('username', 'ユーザー') }}</span><span class="role-badge">{{ session.get('role', 'user') }}</span><a href="{{ url_for('logout') }}">ログアウト</a></div>
+      </header>
+      <main class="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}{% for category, message in messages %}<div class="alert alert-{{ category }}">{{ message }}</div>{% endfor %}{% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+      </main>
+      <footer class="footer">AI人事・研修業務支援システム</footer>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

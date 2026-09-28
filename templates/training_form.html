@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}研修登録 - AI人事研修システム{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>📚 研修登録</h1>
+</div>
+
+<form method="POST" class="form-card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <div class="form-group">
+    <label for="training_name">研修名 <span class="required">*</span></label>
+    <input type="text" id="training_name" name="training_name"
+           value="{{ training.training_name if training else '' }}"
+           placeholder="例: Python基礎研修 2024" required>
+  </div>
+
+  <div class="form-group">
+    <label for="start_date">開始日</label>
+    <input type="date" id="start_date" name="start_date"
+           value="{{ training.start_date if training else '' }}">
+  </div>
+
+  <div class="form-group">
+    <label for="end_date">終了日</label>
+    <input type="date" id="end_date" name="end_date"
+           value="{{ training.end_date if training else '' }}">
+  </div>
+
+  <div class="form-group">
+    <label for="description">概要</label>
+    <textarea id="description" name="description"
+              placeholder="研修の概要・目的を入力">{{ training.description if training else '' }}</textarea>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">登録する</button>
+    <a href="{{ url_for('training_list') }}" class="btn btn-secondary">キャンセル</a>
+  </div>
+
+</form>
+{% endblock %}

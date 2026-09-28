@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Excel取込 - AI人事研修システム{% endblock %}
+{% block content %}
+<div class="page-header"><h1>📥 Excel取込</h1></div>
+<form method="POST" enctype="multipart/form-data" class="form-card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="form-group">
+    <label>取込種別</label>
+    <select name="import_type" id="import_type">
+      <option value="employee">社員台帳</option>
+      <option value="training">研修結果</option>
+    </select>
+  </div>
+  <div class="form-group" id="training-select">
+    <label>対象研修</label>
+    <select name="training_id">
+      {% for tr in trainings %}<option value="{{ tr.id }}">{{ tr.training_name }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="form-group">
+    <label>ファイル（xlsx / csv）</label>
+    <input type="file" name="file" accept=".xlsx,.csv" required>
+  </div>
+  <p class="muted">社員台帳: 社員番号, 氏名, 部署, 役職, 入社日 / 研修結果: 社員番号, 氏名, 出席率, 理解度, 課題スコア</p>
+  <div class="form-actions"><button class="btn btn-primary" type="submit">取込実行</button></div>
+</form>
+{% endblock %}

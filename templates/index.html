@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}ダッシュボード - AI人事研修システム{% endblock %}
+
+{% block content %}
+<div class="content-header"><div><h1>ダッシュボード</h1><p>業務メニューと現在の登録状況を確認できます。</p></div></div>
+{% if session.get('role') in ['staff', 'admin'] %}
+<section class="kpi-grid">
+  <div class="kpi-card"><span>社員数</span><strong>{{ dashboard_stats.employee_count }}</strong><small>有効な社員</small></div>
+  <div class="kpi-card"><span>研修数</span><strong>{{ dashboard_stats.training_count }}</strong><small>登録済み研修</small></div>
+  <div class="kpi-card"><span>AI評価件数</span><strong>{{ dashboard_stats.evaluation_count }}</strong><small>コメント生成済み</small></div>
+  <div class="kpi-card"><span>ログイン権限</span><strong class="role-value">{{ dashboard_stats.role }}</strong><small>現在のロール</small></div>
+</section>
+{% endif %}
+<h2 class="section-title">システムメニュー</h2>
+<section class="dashboard-grid">
+  {% if session.get('role') in ['staff', 'admin'] %}
+  <a href="{{ url_for('employee_list') }}" class="dashboard-card"><span class="card-icon icon-blue">👤</span><h2>社員管理</h2><p>社員情報の登録・更新・検索</p><b>開く →</b></a>
+  <a href="{{ url_for('training_list') }}" class="dashboard-card"><span class="card-icon icon-green">📚</span><h2>研修管理</h2><p>研修登録・出席率・理解度管理</p><b>開く →</b></a>
+  <a href="{{ url_for('evaluation_list') }}" class="dashboard-card"><span class="card-icon icon-yellow">⭐</span><h2>評価管理</h2><p>評価集計・AIコメント生成</p><b>開く →</b></a>
+  <a href="{{ url_for('import_excel') }}" class="dashboard-card"><span class="card-icon icon-purple">📥</span><h2>Excel取込</h2><p>社員台帳・研修結果の取込</p><b>開く →</b></a>
+  {% endif %}
+  <a href="{{ url_for('report_list') }}" class="dashboard-card"><span class="card-icon icon-red">📝</span><h2>日報管理</h2><p>日報の登録・一覧確認</p><b>開く →</b></a>
+  <a href="{{ url_for('search') }}" class="dashboard-card"><span class="card-icon icon-cyan">🔍</span><h2>文書検索</h2><p>社内規則・マニュアルをAI検索</p><b>開く →</b></a>
+  <a href="{{ url_for('chat') }}" class="dashboard-card"><span class="card-icon icon-pink">💬</span><h2>FAQチャット</h2><p>よくある質問へ自動回答</p><b>開く →</b></a>
+</section>
+{% endblock %}

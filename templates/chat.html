@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}FAQチャット - AI人事研修システム{% endblock %}
+{% block content %}
+<div class="page-header"><h1>💬 FAQチャット</h1></div>
+
+<div class="chat-box" id="chat-messages">
+  <div class="chat-message assistant">
+    <div class="bubble">こんにちは。社内FAQチャットボットです。<br>就業規則や社内マニュアルについてお気軽にご質問ください。</div>
+  </div>
+</div>
+
+<form class="chat-form" id="chat-form">
+  <input type="hidden" id="csrf-token" value="{{ csrf_token() }}">
+  <input type="text" id="chat-input" name="message" placeholder="例: 有給休暇の申請方法は？" autocomplete="off" required>
+  <button class="btn btn-primary" id="send-btn" type="submit">送信</button>
+</form>
+
+<script>
+let conversationId = "";
+
+const form = document.getElementById("chat-form");
+const input = document.getElementById("chat-input");
+const sendButton = document.getElementById("send-btn");
+const messages = document.getElementById("chat-messages");
+
+form.addEventListener("submit", sendMessage);
+
+async function sendMessage(event) {
+  event.preventDefault();
+
+  const message = input.value.trim();
+  if (!message) return;
+
+  // 前の質問・回答を残したまま、ユーザーの質問を追加する
+  appendMessage("user", message);
+  input.value = "";
+
+  // 回答生成中の二重送信を防止する
+  setSending(true);
+
+  // Difyから回答が返るまでローディング表示する
+  const loading = appendMessage("assistant", "回答を生成中...", true);
+
+  try {
+    const response = await fetch("{{ url_for('chat_send') }}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": document.getElementById("csrf-token").value,
+      },
+      body: JSON.stringify({
+        message: message,
+        conversation_id: conversationId,
+      }),
+    });
+
+    const data = await response.json();
+    loading.remove();
+
+    if (data.success) {
+      appendMessage("assistant", data.answer);
+      // 次の質問でも同じ会話として扱うため会話IDを保持する
+      conversationId = data.conversation_id || conversationId;
+    } else {
+      appendMessage("assistant", "エラー: " + (data.error || "回答を取得できませんでした。"));
+    }
+  } catch (error) {
+    loading.remove();
+    appendMessage("assistant", "通信エラーが発生しました。");
+  } finally {
+    setSending(false);
+    input.focus();
+  }
+}
+
+function appendMessage(role, content, isLoading = false) {
+  const row = document.createElement("div");
+  row.className = "chat-message " + role + (isLoading ? " loading" : "");
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.textContent = content;
+
+  row.appendChild(bubble);
+  messages.appendChild(row);
+
+  // 回答表示時は常に最新メッセージまでスクロールする
+  messages.scrollTop = messages.scrollHeight;
+  return row;
+}
+
+function setSending(sending) {
+  input.disabled = sending;
+  sendButton.disabled = sending;
+  sendButton.textContent = sending ? "送信中..." : "送信";
+}
+</script>
+{% endblock %}

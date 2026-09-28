@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}研修一覧 - AI人事研修システム{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>📚 研修管理</h1>
+  <a href="{{ url_for('training_new') }}" class="btn btn-primary">＋ 研修登録</a>
+</div>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>研修名</th>
+      <th>開始日</th>
+      <th>終了日</th>
+      <th>操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% if trainings %}
+      {% for tr in trainings %}
+      <tr>
+        <td>{{ tr.training_name }}</td>
+        <td>{{ tr.start_date }}</td>
+        <td>{{ tr.end_date }}</td>
+        <td>
+          <a href="{{ url_for('training_history', training_id=tr.id) }}"
+             class="btn btn-small btn-secondary">受講者・履歴</a>
+        </td>
+      </tr>
+      {% endfor %}
+    {% else %}
+      <tr>
+        <td colspan="4" class="text-center">
+          研修データがありません。<br>
+          <!-- TODO: 第6回「研修管理編」で実装 -->
+          ※ 第6回の実装後にデータが表示されます
+        </td>
+      </tr>
+    {% endif %}
+  </tbody>
+</table>
+{% endblock %}

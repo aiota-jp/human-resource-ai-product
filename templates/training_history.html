@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}研修履歴 - AI人事研修システム{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>📚 研修履歴</h1>
+    <p class="muted">{{ training.training_name }} / {{ training.start_date }} 〜 {{ training.end_date }}</p>
+  </div>
+  <a href="{{ url_for('training_list') }}" class="btn btn-secondary">研修一覧へ</a>
+</div>
+<form method="POST" class="card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <table class="table">
+    <thead><tr><th>社員番号</th><th>氏名</th><th>部署</th><th>出席率</th><th>理解度</th><th>課題</th></tr></thead>
+    <tbody>
+      {% for h in histories %}
+      <tr>
+        <td>{{ h.employee_no }}<input type="hidden" name="employee_id" value="{{ h.employee_id }}"></td>
+        <td>{{ h.name }}</td><td>{{ h.department }}</td>
+        <td><input type="number" name="attendance_rate_{{ h.employee_id }}" min="0" max="100" step="0.1" value="{{ h.attendance_rate }}"></td>
+        <td><input type="number" name="understanding_level_{{ h.employee_id }}" min="0" max="100" value="{{ h.understanding_level }}"></td>
+        <td><input type="number" name="report_score_{{ h.employee_id }}" min="0" max="100" value="{{ h.report_score }}"></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="form-actions"><button class="btn btn-primary" type="submit">保存する</button></div>
+</form>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ portal.employee.name }}さんのマイページ - AI人事研修システム{% endblock %}
+
+{% block content %}
+<div class="content-header">
+  <div>
+    <h1>{{ portal.employee.name }}さんのマイページ</h1>
+    <p>自分の社員情報、研修履歴、評価、日報を確認できます。</p>
+  </div>
+</div>
+
+<section class="kpi-grid">
+  <div class="kpi-card"><span>社員番号</span><strong class="role-value">{{ portal.employee.employee_no }}</strong><small>{{ portal.employee.department or '部署未設定' }}</small></div>
+  <div class="kpi-card"><span>役職</span><strong class="role-value">{{ portal.employee.position or '未設定' }}</strong><small>入社日 {{ portal.employee.hire_date or '-' }}</small></div>
+  <div class="kpi-card"><span>受講研修数</span><strong>{{ portal.histories|length }}</strong><small>登録済みの研修履歴</small></div>
+  <div class="kpi-card"><span>最新評価</span><strong>{{ portal.evaluation.score if portal.evaluation else '-' }}</strong><small>総合スコア</small></div>
+</section>
+
+<div class="card section-card">
+  <div class="card-header-row"><h2>最新の評価</h2></div>
+  {% if portal.evaluation %}
+  <p><strong>AIコメント：</strong>{{ portal.evaluation.ai_comment or 'まだコメントは生成されていません。' }}</p>
+  {% else %}
+  <p class="empty-message">評価はまだ登録されていません。</p>
+  {% endif %}
+</div>
+
+<div class="card section-card">
+  <div class="card-header-row"><h2>研修履歴</h2></div>
+  {% if portal.histories %}
+  <div class="table-wrap"><table class="table"><thead><tr><th>研修名</th><th>期間</th><th>出席率</th><th>理解度</th><th>課題スコア</th></tr></thead><tbody>
+  {% for history in portal.histories %}<tr><td>{{ history.training_name }}</td><td>{{ history.start_date or '-' }} ～ {{ history.end_date or '-' }}</td><td>{{ history.attendance_rate }}%</td><td>{{ history.understanding_level }}</td><td>{{ history.report_score }}</td></tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<p class="empty-message">研修履歴はまだ登録されていません。</p>{% endif %}
+</div>
+
+<div class="card section-card">
+  <div class="card-header-row"><h2>最近の日報</h2><a class="btn btn-primary" href="{{ url_for('report_list') }}">日報を登録・確認</a></div>
+  {% if portal.reports %}
+  <div class="table-wrap"><table class="table"><thead><tr><th>日付</th><th>作業内容</th><th>所感・メモ</th></tr></thead><tbody>
+  {% for report in portal.reports %}<tr><td>{{ report.report_date }}</td><td>{{ report.content or '-' }}</td><td>{{ report.memo or '-' }}</td></tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<p class="empty-message">日報はまだ登録されていません。</p>{% endif %}
+</div>
+{% endblock %}

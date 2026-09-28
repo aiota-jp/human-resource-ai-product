@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}社員一覧 - AI人事研修システム{% endblock %}
+
+{% block content %}
+<div class="content-header"><div><h1>社員管理</h1><p>社員情報の検索・登録・編集を行います。</p></div></div>
+<section class="page-card">
+<div class="page-title-row"><div><h2>👤 社員一覧</h2><p>表示件数：<strong>{{ employees|length }}</strong>名</p></div><a href="{{ url_for('employee_new') }}" class="btn btn-primary">＋ 新規登録</a></div>
+<form method="GET" action="{{ url_for('employee_list') }}" class="search-panel">
+  <div class="search-field"><label for="keyword">キーワード</label><input id="keyword" type="search" name="keyword" placeholder="社員番号・氏名・部署で検索" value="{{ request.args.get('keyword', '') }}"></div>
+  <button type="submit" class="btn btn-dark">検索</button>
+  {% if request.args.get('keyword') %}<a href="{{ url_for('employee_list') }}" class="btn btn-secondary">クリア</a>{% endif %}
+</form>
+<div class="table-wrap"><table class="table data-table">
+  <thead>
+    <tr>
+      <th>社員番号</th>
+      <th>氏名</th>
+      <th>部署</th>
+      <th>役職</th>
+      <th>入社日</th>
+      <th>操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% if employees %}
+      {% for emp in employees %}
+      <tr>
+        <td class="employee-number">{{ emp.employee_no }}</td>
+        <td>{{ emp.name }}</td>
+        <td><span class="badge">{{ emp.department or '未設定' }}</span></td>
+        <td>{{ emp.position }}</td>
+        <td>{{ emp.hire_date }}</td>
+        <td>
+          <a href="{{ url_for('employee_edit', employee_id=emp.id) }}"
+             class="btn btn-small btn-edit">編集</a>
+          {% if session.get('role') == 'admin' %}
+          <form method="POST"
+                action="{{ url_for('employee_delete', employee_id=emp.id) }}"
+                style="display:inline;"
+                onsubmit="return confirm('削除しますか？');">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-small btn-danger">削除</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    {% else %}
+      <tr>
+        <td colspan="6" class="text-center">
+          条件に一致する社員データがありません。
+        </td>
+      </tr>
+    {% endif %}
+  </tbody>
+</table></div>
+</section>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}評価管理 - AI人事研修システム{% endblock %}
+{% block content %}
+<div class="content-header"><div><h1>評価管理</h1><p>研修実績を確認し、AI評価コメントを生成します。</p></div></div>
+<section class="page-card">
+<div class="page-title-row"><div><h2>⭐ 評価一覧・AIコメント生成</h2><p>社員ごとの最新評価を表示しています。</p></div><a href="{{ url_for('export_excel') }}" class="btn btn-primary">評価一覧をExcel出力</a></div>
+<div class="summary-grid">
+  <div class="summary-card"><span>評価対象者</span><strong>{{ evaluation_stats.target_count }}名</strong></div>
+  <div class="summary-card"><span>平均出席率</span><strong>{{ evaluation_stats.attendance_average }}%</strong></div>
+  <div class="summary-card"><span>平均理解度</span><strong>{{ evaluation_stats.understanding_average }}%</strong></div>
+  <div class="summary-card"><span>AIコメント生成済み</span><strong>{{ evaluation_stats.generated_count }}件</strong></div>
+</div>
+<div class="table-wrap"><table class="table data-table evaluation-table">
+  <thead><tr><th>社員番号</th><th>氏名</th><th>部署</th><th>出席率</th><th>理解度</th><th>課題</th><th>総合</th><th>AIコメント</th><th>操作</th></tr></thead>
+  <tbody>
+  {% for ev in evaluations %}
+    <tr>
+      <td>{{ ev.employee_no }}</td><td>{{ ev.name }}</td><td>{{ ev.department }}</td>
+      <td><span class="score-chip">{{ ev.attendance_rate }}%</span></td><td><span class="score-chip">{{ ev.understanding_level }}%</span></td><td><span class="score-chip">{{ ev.report_score }}</span></td>
+      <td><strong class="total-score">{{ ev.score or ev.calculated_score }}</strong></td>
+      <td class="comment-cell {% if not ev.ai_comment %}not-created{% endif %}">{{ ev.ai_comment or '未生成' }}</td>
+      <td>
+        <form method="POST" action="{{ url_for('evaluation_generate', employee_id=ev.employee_id) }}" class="ai-generate-form" data-employee-name="{{ ev.name }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-small btn-generate" type="submit">
+            <span class="button-label">{% if ev.ai_comment %}再生成{% else %}AI生成{% endif %}</span>
+          </button>
+        </form>
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="9" class="text-center">評価対象の社員がありません。</td></tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+</section>
+
+<div id="ai-loading-overlay" class="ai-loading-overlay" role="status" aria-live="polite" aria-hidden="true">
+  <div class="ai-loading-panel">
+    <span class="loading-spinner" aria-hidden="true"></span>
+    <strong>AI評価コメントを生成中...</strong>
+    <p id="ai-loading-message">Difyからの回答を待っています。しばらくお待ちください。</p>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll(".ai-generate-form").forEach((form) => {
+  form.addEventListener("submit", () => {
+    const button = form.querySelector("button[type='submit']");
+    const label = button.querySelector(".button-label");
+    const employeeName = form.dataset.employeeName;
+    const overlay = document.getElementById("ai-loading-overlay");
+    const message = document.getElementById("ai-loading-message");
+
+    button.disabled = true;
+    button.classList.add("is-loading");
+    label.innerHTML = '<span class="button-spinner" aria-hidden="true"></span>生成中...';
+
+    message.textContent = employeeName
+      ? employeeName + "さんの評価コメントを生成しています。しばらくお待ちください。"
+      : "Difyからの回答を待っています。しばらくお待ちください。";
+    overlay.classList.add("is-visible");
+    overlay.setAttribute("aria-hidden", "false");
+
+    document.querySelectorAll(".ai-generate-form button").forEach((item) => {
+      item.disabled = true;
+    });
+  });
+});
+</script>
+{% endblock %}

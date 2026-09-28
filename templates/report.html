@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}日報管理 - AI人事研修システム{% endblock %}
+{% block content %}
+<div class="page-header"><h1>📝 日報管理</h1></div>
+<form method="POST" class="form-card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="form-row">
+    <div class="form-group"><label>社員</label><select name="employee_id" required {% if employee_mode %}disabled{% endif %}>{% for e in employees %}<option value="{{ e.id }}">{{ e.employee_no }} {{ e.name }}</option>{% endfor %}</select>{% if employee_mode %}<input type="hidden" name="employee_id" value="{{ employees[0].id }}">{% endif %}</div>
+    <div class="form-group"><label>日付</label><input type="date" name="report_date" value="{{ today }}" required></div>
+  </div>
+  <div class="form-group"><label>作業内容</label><textarea name="content" rows="4" required></textarea></div>
+  <div class="form-group"><label>所感・メモ</label><textarea name="memo" rows="3"></textarea></div>
+  <div class="form-actions"><button class="btn btn-primary" type="submit">登録する</button></div>
+</form>
+<table class="table">
+  <thead><tr><th>日付</th><th>社員</th><th>作業内容</th><th>メモ</th></tr></thead>
+  <tbody>{% for r in reports %}<tr><td>{{ r.report_date }}</td><td>{{ r.employee_no }} {{ r.employee_name }}</td><td>{{ r.content }}</td><td>{{ r.memo }}</td></tr>{% else %}<tr><td colspan="4" class="text-center">日報がありません。</td></tr>{% endfor %}</tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,28 @@
+services:
+  human-resource-ai:
+    build:
+      context: .
+    container_name: human-resource-ai
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    volumes:
+      - ./database.db:/app/database.db
+      - ./uploads:/app/uploads
+      - ./outputs:/app/outputs
+
+    expose:
+      - "5000"
+
+    networks:
+      - internal
+      - proxy
+
+networks:
+  internal:
+    driver: bridge
+
+  proxy:
+    external: true
